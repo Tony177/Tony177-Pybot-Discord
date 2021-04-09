@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Custom ignore rules
+Music/*
+
 # C extensions
 *.so
 

@@ -1,0 +1,13 @@
+# Config File
+#
+# 
+# This is a comment
+# You can comment variable as seen
+#
+#
+
+token = INSERT_YOU_TOKEN_HERE
+can_download = true
+log_output = true
+
+
