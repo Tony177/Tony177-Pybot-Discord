@@ -67,6 +67,15 @@ def start():
     print("Loaded config file!\n")
 
 
+async def print_list():
+    file_list = os.listdir("Music/")
+    # Channel Object of "list" channel
+    channel = bot.get_channel(768094168132091955)
+    text = "There are " + str(len(file_list)) + " avaible audio track"
+    for file in file_list:
+        text +="\n-> " + (str(file).split(".")[0])
+    await channel.send(text)
+
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
         super().__init__(source, volume)
@@ -134,8 +143,7 @@ class Music(commands.Cog):
         """Download a file into the local filesystem """
 
         if not query:
-            ctx.send("Error: command value is empty!")
-            return
+            raise commands.CommandError("Syntax error in download command.")
         download_format_options["outtmpl"] = (
             "Music/" + str(query[1]).lower() + ".%(ext)s"
         )
@@ -143,10 +151,9 @@ class Music(commands.Cog):
         async with ctx.typing():
             download = youtube_dl.YoutubeDL(download_format_options)
             download.download([query[0]])
-        await ctx.send("Complete download file: {}".format(str(query[1]).lower()))
-        await print(
-            "The user " + str(ctx.author) + " downloaded the audio " + str(query[0])
-        )
+        await ctx.send("Completed the download of: {}".format(str(query[1]).lower()))
+        await print_list()
+        print("The user " + str(ctx.author) + " downloaded the audio " + str(query[0]))
 
     @commands.command()
     async def volume(self, ctx, volume: int):
