@@ -7,6 +7,11 @@ import os
 
 from discord.ext import commands
 
+# Color costant
+RED = "\033[1;31m"
+GREEN = "\033[0;32m"
+RESET = "\033[0;0m"
+
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ""
 
@@ -64,7 +69,7 @@ def start():
             key = line.split("=")[0].strip()
             current_list = line.split("=")[-1].strip()
             config[key] = current_list
-    print("Loaded config file!\n")
+    print(GREEN + "Loaded config file!\n" + RESET)
 
 
 async def print_list():
@@ -72,9 +77,11 @@ async def print_list():
     # Channel Object of "list" channel
     channel = bot.get_channel(768094168132091955)
     text = "There are " + str(len(file_list)) + " avaible audio track"
+    await channel.purge(limit=2)  # Removing previous messagess
     for file in file_list:
-        text +="\n-> " + (str(file).split(".")[0])
+        text += "\n-> " + (str(file).split(".")[0])
     await channel.send(text)
+
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -153,7 +160,7 @@ class Music(commands.Cog):
             download.download([query[0]])
         await ctx.send("Completed the download of: {}".format(str(query[1]).lower()))
         await print_list()
-        print("The user " + str(ctx.author) + " downloaded the audio " + str(query[0]))
+        print("The user " + str(ctx.author) + " downloaded the audio: " + str(query[1]))
 
     @commands.command()
     async def volume(self, ctx, volume: int):
@@ -193,6 +200,7 @@ bot = commands.Bot(
 @bot.event
 async def on_ready():
     print("Logged in as {0} ({0.id})".format(bot.user))
+    print(GREEN + "Successfully started!" + RESET)
     print("------")
 
 
