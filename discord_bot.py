@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import asyncio
 
 import discord
@@ -48,6 +49,8 @@ ffmpeg_options = {"options": "-vn"}
 
 
 def start():
+    # Change working directory to this file's directory
+    os.chdir(os.path.dirname(os.path.realpath(__file__)))
     with open("config.txt", "r") as file:
         f = file.readlines()
     if not f:
@@ -141,7 +144,9 @@ class Music(commands.Cog):
             download = youtube_dl.YoutubeDL(download_format_options)
             download.download([query[0]])
         await ctx.send("Complete download file: {}".format(str(query[1]).lower()))
-        await print("The user " + ctx.author + " downloaded the audio " + str(query[0]))
+        await print(
+            "The user " + str(ctx.author) + " downloaded the audio " + str(query[0])
+        )
 
     @commands.command()
     async def volume(self, ctx, volume: int):
@@ -185,9 +190,6 @@ async def on_ready():
 
 
 def main():
-    os.chdir(
-        os.path.dirname(os.path.realpath(__file__))
-    )  # Change working directory to this file's directory
     start()
     bot.add_cog(Music(bot))
     bot.run(config["token"])
