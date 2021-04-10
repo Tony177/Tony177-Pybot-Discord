@@ -5,7 +5,6 @@ __pycache__/
 
 # Custom ignore rules
 Music/*
-config.txt
 
 # C extensions
 *.so
