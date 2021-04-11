@@ -69,7 +69,7 @@ def start():
             key = line.split("=")[0].strip()
             current_list = line.split("=")[-1].strip()
             config[key] = current_list
-    print(GREEN + "Loaded config file!\n" + RESET)
+    print(GREEN + "Loaded config file!" + RESET)
 
 
 async def print_list():
@@ -199,6 +199,7 @@ bot = commands.Bot(
 
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=discord.Game(name="@" + bot.user.name))
     print("Logged in as {0} ({0.id})".format(bot.user))
     print(GREEN + "Successfully started!" + RESET)
     print("------")
