@@ -20,8 +20,13 @@ You can customize the bot as you prefer, modifing config.txt and global variable
 
 ## Command
 
-- <b><i>play </i></b> - command need just the audio file name (without extension)
-- <b><i>dd </i></b> - command need as first parameter a youtube link and as second parameter the name of the audio file to be saved (without extension), it will be saved in Music directory (created before)
+- <b><i>join </i></b> - works with the channel name (caps sensitive) and joins the voice channel
+- <b><i>play </i></b> - works with the audio file name (without extension) and start playing an audio
+- <b><i>yt </i></b> - works with the youtube link as first parameter, play the relative video as audio in the voice channel
+- <b><i>dd </i></b> - works with the youtube link as first parameter, the name of the audio file as second parameter (without extension), will save it in the default Music directory (created before and changeble)
+- <b><i>volume </i></b> - works with the volume number (between 0 and 100) changing the default volume of the audio player
+- <b><i>list </i></b> - no needed parameters, just print sorted list of audio in the default "list channel"
+- <b><i>stop </i></b> - no needed parameters, just stop and disconnects the bot from voice channel
 
 # Thanks to
 
