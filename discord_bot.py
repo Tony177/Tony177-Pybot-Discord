@@ -78,6 +78,7 @@ async def print_list():
     channel = bot.get_channel(768094168132091955)
     text = "There are " + str(len(file_list)) + " avaible audio track"
     await channel.purge(limit=2)  # Removing previous messagess
+    file_list = sorted(file_list)
     for file in file_list:
         text += "\n-> " + (str(file).split(".")[0])
     await channel.send(text)
@@ -171,6 +172,10 @@ class Music(commands.Cog):
 
         ctx.voice_client.source.volume = volume / 100
         await ctx.send("Changed volume to {}%".format(volume))
+
+    @commands.command()
+    async def list(self, ctx):
+        await print_list()
 
     @commands.command()
     async def stop(self, ctx):
