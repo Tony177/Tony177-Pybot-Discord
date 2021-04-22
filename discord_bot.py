@@ -165,6 +165,12 @@ class Music(commands.Cog):
         if config["can_download"]:
             if not query:
                 raise commands.CommandError("Syntax error in download command.")
+            file_list = os.listdir("Music/")
+            for f in file_list:
+                if(f.split(".")[0].lower() == str(query[1]).lower()):
+                    ctx.send("File alredy exists!")
+                    raise commands.CommandError("File alredy exists!")
+
             download_format_options["outtmpl"] = "Music/{}.%(ext)s".format(
                 str(query[1]).lower()
             )
