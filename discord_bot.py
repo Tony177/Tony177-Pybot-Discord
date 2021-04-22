@@ -126,7 +126,6 @@ class Music(commands.Cog):
     @commands.command()
     async def play(self, ctx, *, query):
         """Plays a file from the local filesystem"""
-
         source = discord.PCMVolumeTransformer(
             discord.FFmpegPCMAudio("Music/" + query + ".mp3")
         )
@@ -139,7 +138,6 @@ class Music(commands.Cog):
     @commands.command()
     async def yt(self, ctx, *, url):
         """Streams from a url (doesn't predownload)"""
-
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
             ctx.voice_client.play(
@@ -188,7 +186,6 @@ class Music(commands.Cog):
     @commands.command()
     async def volume(self, ctx, volume: int):
         """Changes the player's volume"""
-
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel.")
 
@@ -198,7 +195,6 @@ class Music(commands.Cog):
     @commands.command()
     async def list(self, ctx):
         """Print the sorted list of audio file"""
-
         await print_list()
 
     @commands.command()
