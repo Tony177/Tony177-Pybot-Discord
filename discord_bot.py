@@ -69,6 +69,10 @@ def start():
             key = line.split("=")[0].strip()
             current_list = line.split("=")[-1].strip()
             config[key] = current_list
+            # Every "boolean" strings return boolean
+            if config[key] in ["true", "True", "False", "false"]:
+                config[key] = bool(config[key])
+
     print(GREEN + "Loaded config file!" + RESET)
 
 
@@ -136,7 +140,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def yt(self, ctx, *, url):
-        """Streams from a url (same as yt, but doesn't predownload)"""
+        """Streams from a url (doesn't predownload)"""
 
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
@@ -147,21 +151,38 @@ class Music(commands.Cog):
         await ctx.send("Now playing: {}".format(player.title))
 
     @commands.command()
+    async def candd(self, ctx):
+        for role in ctx.author.roles:
+            if str(role) == "Admin":
+                config["can_download"] = not config["can_download"]
+                await ctx.send("Now set can download: " + str(config["can_download"]))
+                return
+        await ctx.send("You don't have enought permission to use this command!")
+
+    @commands.command()
     async def dd(self, ctx, *query):
         """Download a file into the local filesystem """
-
-        if not query:
-            raise commands.CommandError("Syntax error in download command.")
-        download_format_options["outtmpl"] = (
-            "Music/" + str(query[1]).lower() + ".%(ext)s"
-        )
-
-        async with ctx.typing():
-            download = youtube_dl.YoutubeDL(download_format_options)
-            download.download([query[0]])
-        await ctx.send("Completed the download of: {}".format(str(query[1]).lower()))
-        await print_list()
-        print("The user " + str(ctx.author) + " downloaded the audio: " + str(query[1]))
+        if config["can_download"]:
+            if not query:
+                raise commands.CommandError("Syntax error in download command.")
+            download_format_options["outtmpl"] = "Music/{}.%(ext)s".format(
+                str(query[1]).lower()
+            )
+            async with ctx.typing():
+                download = youtube_dl.YoutubeDL(download_format_options)
+                download.download([query[0]])
+            await ctx.send(
+                "Completed the download of: {}".format(str(query[1]).lower())
+            )
+            await print_list()
+            print(
+                "The user "
+                + str(ctx.author)
+                + " downloaded the audio: "
+                + str(query[1])
+            )
+        else:
+            await ctx.send("Download is disabled from config!")
 
     @commands.command()
     async def volume(self, ctx, volume: int):
@@ -174,14 +195,16 @@ class Music(commands.Cog):
         await ctx.send("Changed volume to {}%".format(volume))
 
     @commands.command()
-    async def list(self, ctx):
+    async def list(self):
+        """Print the sorted list of audio file"""
+
         await print_list()
 
     @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
-
-        await ctx.voice_client.disconnect()
+        if ctx.voice_client:
+            await ctx.voice_client.disconnect()
 
     @play.before_invoke
     @yt.before_invoke
