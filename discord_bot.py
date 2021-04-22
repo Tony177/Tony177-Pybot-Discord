@@ -19,7 +19,7 @@ youtube_dl.utils.bug_reports_message = lambda: ""
 config = {}
 
 # More info can be found on youtube-dl github repository
-## Global stream options for ytdl
+# Global stream options for ytdl
 stream_format_options = {
     "format": "bestaudio/best",
     "outtmpl": "%(extractor)s-%(id)s-%(title)s.%(ext)s",
@@ -34,7 +34,7 @@ stream_format_options = {
     "source_address": "0.0.0.0",
 }
 
-## Global download options for ytdl
+# Global download options for ytdl
 download_format_options = {
     "format": "bestaudio/best",
     "outtmpl": "Empty",
@@ -60,19 +60,17 @@ def start():
         f = file.readlines()
     if not f:
         raise FileNotFoundError("File doesn't exists or is corrupted")
-    global config
     for line in f:
         # Removing blank space to filter empty line
         line = line.strip()
         # If startig with "#" is a comment
         if not line.startswith("#") and line:
             key = line.split("=")[0].strip()
-            current_list = line.split("=")[-1].strip()
-            config[key] = current_list
+            current_line = line.split("=")[-1].strip()
+            config.update({key: current_line})
             # Every "boolean" strings return boolean
             if config[key] in ["true", "True", "False", "false"]:
-                config[key] = bool(config[key])
-
+                config.update({key: bool(current_line)})
     print(GREEN + "Loaded config file!" + RESET)
 
 
@@ -84,7 +82,7 @@ async def print_list():
     await channel.purge(limit=2)  # Removing previous messagess
     file_list = sorted(file_list)
     for file in file_list:
-        text += "\n-> " + (str(file).split(".")[0])
+        text += "\n|-> {}".format(file.split(".")[0] + " <-|")
     await channel.send(text)
 
 
@@ -114,8 +112,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 
 class Music(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot_in):
+        self.bot = bot_in
 
     @commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel):
@@ -167,7 +165,7 @@ class Music(commands.Cog):
                 raise commands.CommandError("Syntax error in download command.")
             file_list = os.listdir("Music/")
             for f in file_list:
-                if(f.split(".")[0].lower() == str(query[1]).lower()):
+                if f.split(".")[0].lower() == str(query[1]).lower():
                     ctx.send("File alredy exists!")
                     raise commands.CommandError("File alredy exists!")
 
@@ -181,11 +179,8 @@ class Music(commands.Cog):
                 "Completed the download of: {}".format(str(query[1]).lower())
             )
             await print_list()
-            print(
-                "The user "
-                + str(ctx.author)
-                + " downloaded the audio: "
-                + str(query[1])
+            print("The user {} downloaded the audio: {}").format(
+                str(ctx.author), str(query[1])
             )
         else:
             await ctx.send("Download is disabled from config!")
@@ -201,7 +196,7 @@ class Music(commands.Cog):
         await ctx.send("Changed volume to {}%".format(volume))
 
     @commands.command()
-    async def list(self):
+    async def list(self, ctx):
         """Print the sorted list of audio file"""
 
         await print_list()
@@ -247,3 +242,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
