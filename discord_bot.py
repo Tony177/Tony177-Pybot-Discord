@@ -167,7 +167,7 @@ class Music(commands.Cog):
                 raise commands.CommandError("Syntax error in download command.")
             file_list = os.listdir("Music/")
             for f in file_list:
-                if(f.split(".")[0].lower() == str(query[1]).lower()):
+                if f.split(".")[0].lower() == str(query[1]).lower():
                     ctx.send("File alredy exists!")
                     raise commands.CommandError("File alredy exists!")
 
