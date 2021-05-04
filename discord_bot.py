@@ -170,7 +170,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def dd(self, ctx, *query):
-        """Download a file into the local filesystem """
+        """Download a file into the local filesystem"""
         if config["can_download"]:
             if not query:
                 raise commands.CommandError("Syntax error in download command.")
