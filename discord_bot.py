@@ -156,13 +156,14 @@ class Music(commands.Cog):
         await ctx.send("You don't have enought permission to use this command!")
 
     @commands.command()
-    async def remove(self, ctx, file_name: str):
+    async def remove(self, ctx, file_name):
         if "/" or ".." in file_name:
             await ctx.send("Can't use / or .. inside filename")
             return
         for role in ctx.author.roles:
             if str(role) == "Admin":
                 os.remove("Music/{}".format(file_name))
+                await ctx.send("Removed: {} !".format(file_name))
                 return
         await ctx.send("You don't have enought permission to use this command!")
 
