@@ -156,6 +156,17 @@ class Music(commands.Cog):
         await ctx.send("You don't have enought permission to use this command!")
 
     @commands.command()
+    async def remove(self, ctx, file_name: str):
+        if "/" or ".." in file_name:
+            await ctx.send("Can't use / or .. inside filename")
+            return
+        for role in ctx.author.roles:
+            if str(role) == "Admin":
+                os.remove("Music/{}".format(file_name))
+                return
+        await ctx.send("You don't have enought permission to use this command!")
+
+    @commands.command()
     async def dd(self, ctx, *query):
         """Download a file into the local filesystem """
         if config["can_download"]:
