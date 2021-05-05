@@ -4,6 +4,7 @@ import asyncio
 import discord
 import youtube_dl
 import os
+from bisect import insort
 
 from discord.ext import commands
 
@@ -17,7 +18,6 @@ youtube_dl.utils.bug_reports_message = lambda: ""
 
 # Config initialized to an empy dict
 config = {}
-
 # More info can be found on youtube-dl github repository
 # Global stream options for ytdl
 stream_format_options = {
@@ -55,7 +55,9 @@ ffmpeg_options = {"options": "-vn"}
 
 def start():
     # Change working directory to this file's directory
+    global file_list
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    file_list = sorted(os.listdir("Music/"))
     with open("config.txt", "r") as file:
         f = file.readlines()
     if not f:
@@ -75,14 +77,12 @@ def start():
 
 
 async def print_list():
-    file_list = os.listdir("Music/")
     # Channel Object of "list" channel
     channel = bot.get_channel(768094168132091955)
     text = "There are " + str(len(file_list)) + " avaible audio track"
     await channel.purge(limit=2)  # Removing previous messagess
-    file_list = sorted(file_list)
     for file in file_list:
-        text += "\n|-> {}".format(file.split(".")[0] + " <-|")
+        text += "\n|->  {}".format(file.split(".")[0])
     await channel.send(text)
 
 
@@ -126,14 +126,17 @@ class Music(commands.Cog):
     @commands.command()
     async def play(self, ctx, *, query):
         """Plays a file from the local filesystem"""
-        source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio("Music/" + query + ".mp3")
-        )
-        ctx.voice_client.play(
-            source, after=lambda e: print("Player error: %s" % e) if e else None
-        )
-
-        await ctx.send("Now playing: {}".format(query))
+        for f in file_list:
+            if f.split(".")[0].lower() == query.lower():
+                source = discord.PCMVolumeTransformer(
+                    discord.FFmpegPCMAudio("Music/{}.mp3".format(query))
+                )
+                ctx.voice_client.play(
+                    source, after=lambda e: print("Player error: %s" % e) if e else None
+                )
+                await ctx.send("Now playing: {}".format(query))
+                return
+        await ctx.send("File doesn't exists!")
 
     @commands.command()
     async def yt(self, ctx, *, url):
@@ -147,26 +150,22 @@ class Music(commands.Cog):
         await ctx.send("Now playing: {}".format(player.title))
 
     @commands.command()
+    @commands.has_role("Admin")
     async def candd(self, ctx):
-        for role in ctx.author.roles:
-            if str(role) == "Admin":
-                config["can_download"] = not config["can_download"]
-                await ctx.send("Now set can download: " + str(config["can_download"]))
-                return
-        await ctx.send("You don't have enought permission to use this command!")
+        config["can_download"] = not config["can_download"]
+        await ctx.send("Now set can download: " + str(config["can_download"]))
+        return
 
     @commands.command()
+    @commands.has_role("Admin")
     async def remove(self, ctx, file_name):
-        print(file_name)
         if "/" in file_name or ".." in file_name:
             await ctx.send("Can't use / or .. inside filename")
             return
-        for role in ctx.author.roles:
-            if str(role) == "Admin":
-                os.remove("Music/{}.mp3".format(file_name))
-                await ctx.send("Removed: {}!".format(file_name))
-                return
-        await ctx.send("You don't have enought permission to use this command!")
+        os.remove("Music/{}.mp3".format(file_name))
+        await ctx.send("Removed: {}!".format(file_name))
+        print("{} removed the audio: {}".format(str(ctx.author), file_name))
+        await print_list()
 
     @commands.command()
     async def dd(self, ctx, *query):
@@ -174,7 +173,6 @@ class Music(commands.Cog):
         if config["can_download"]:
             if not query:
                 raise commands.CommandError("Syntax error in download command.")
-            file_list = os.listdir("Music/")
             for f in file_list:
                 if f.split(".")[0].lower() == str(query[1]).lower():
                     ctx.send("File alredy exists!")
@@ -189,9 +187,12 @@ class Music(commands.Cog):
             await ctx.send(
                 "Completed the download of: {}".format(str(query[1]).lower())
             )
+            insort(file_list, str(query[1]).lower())
             await print_list()
-            print("The user {} downloaded the audio: {}").format(
-                str(ctx.author), str(query[1])
+            print(
+                "The user {} downloaded the audio: {}".format(
+                    str(ctx.author), str(query[1])
+                )
             )
         else:
             await ctx.send("Download is disabled from config!")
