@@ -82,7 +82,7 @@ async def print_list():
     await channel.purge(limit=2)  # Removing previous messagess
     file_list = sorted(file_list)
     for file in file_list:
-        text += "\n|-> {}".format(file.split(".")[0] + " <-|")
+        text += "\n|->  {}".format(file.split(".")[0])
     await channel.send(text)
 
 
@@ -132,8 +132,12 @@ class Music(commands.Cog):
         ctx.voice_client.play(
             source, after=lambda e: print("Player error: %s" % e) if e else None
         )
-
-        await ctx.send("Now playing: {}".format(query))
+        file_list = os.listdir("Music/")
+        for f in file_list:
+            if f.split(".")[0].lower() == query.lower():
+                await ctx.send("Now playing: {}".format(query))
+                return
+        await ctx.send("File doesn't exists!")
 
     @commands.command()
     async def yt(self, ctx, *, url):
@@ -147,26 +151,22 @@ class Music(commands.Cog):
         await ctx.send("Now playing: {}".format(player.title))
 
     @commands.command()
+    @commands.has_role("Admin")
     async def candd(self, ctx):
-        for role in ctx.author.roles:
-            if str(role) == "Admin":
-                config["can_download"] = not config["can_download"]
-                await ctx.send("Now set can download: " + str(config["can_download"]))
-                return
-        await ctx.send("You don't have enought permission to use this command!")
+        config["can_download"] = not config["can_download"]
+        await ctx.send("Now set can download: " + str(config["can_download"]))
+        return
 
     @commands.command()
+    @commands.has_role("Admin")
     async def remove(self, ctx, file_name):
-        print(file_name)
         if "/" in file_name or ".." in file_name:
             await ctx.send("Can't use / or .. inside filename")
             return
-        for role in ctx.author.roles:
-            if str(role) == "Admin":
-                os.remove("Music/{}.mp3".format(file_name))
-                await ctx.send("Removed: {}!".format(file_name))
-                return
-        await ctx.send("You don't have enought permission to use this command!")
+        os.remove("Music/{}.mp3".format(file_name))
+        await ctx.send("Removed: {}!".format(file_name))
+        print("{} removed the audio: {}".format(str(ctx.author), file_name))
+        await print_list()
 
     @commands.command()
     async def dd(self, ctx, *query):
