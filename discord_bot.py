@@ -71,8 +71,10 @@ def start():
             current_line = line.split("=")[-1].strip()
             config.update({key: current_line})
             # Every "boolean" strings return boolean
-            if config[key] in ["true", "True", "False", "false"]:
-                config.update({key: bool(current_line)})
+            if config[key] in ["true", "True"]:
+                config.update({key: True})
+            elif config[key] in ["false", "False"]:
+                config.update({key: False})
     print(GREEN + "Loaded config file!" + RESET)
 
 
@@ -169,7 +171,7 @@ class Music(commands.Cog):
 
     @commands.command()
     async def dd(self, ctx, *query):
-        """Download a file into the local filesystem"""
+        """Download a file into the local filesystem """
         if config["can_download"]:
             if not query:
                 raise commands.CommandError("Syntax error in download command.")
